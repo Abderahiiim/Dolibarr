@@ -15,7 +15,6 @@ class Demandestock extends CommonObject{
     public $fk_user_modif;
     public $fk_user_valid;
     public $fk_statut ;
-
 	public $type_demande;
 
 
@@ -77,7 +76,7 @@ class Demandestock extends CommonObject{
                 $this->fk_user_valid = $obj->fk_user_valid;
                 $this->date_demande = $obj->date_demande;
 				$this->date_souhaite = $obj->desired_date;
-				$this->type_demande = $obj->type_demande;
+				$this->type_demande = $obj->type_demande; //
                 $this->date_creation = $this->db->jdate(string: $obj->date_creation);
                 $this->date_modification = $this->db->jdate(string: $obj->date_modif);
                 $this->date_validation = $this->db->jdate(string: $obj->date_valid);
@@ -115,7 +114,7 @@ class Demandestock extends CommonObject{
         $sql .= "ref";
         $sql .= ", fk_project";
         $sql .= ", object_demande";
-		$sql .= ", type_demande";
+		$sql .= ", type_demande"; //
         $sql .= ", date_demande";
         $sql .= ", desired_date";
         $sql .= ", fk_warehouse";
@@ -126,7 +125,7 @@ class Demandestock extends CommonObject{
         $sql.="'(PROV)'";
         $sql.=", ".($this->fk_project ? $this->fk_project: 'NULL');
         $sql.=",'".$this->object_demande."'";
-        $sql.=",'".$this->type_demande."'";
+        $sql.=",'".$this->type_demande."'"; //
         $sql.=",'".$this->db->idate( $this->date_demande)."'";
         $sql.=",'".$this->db->idate ( $this->date_souhaite)."'";
 

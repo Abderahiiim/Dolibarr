@@ -77,8 +77,8 @@ $desired_date = dol_mktime(12,0,0, GETPOST('date_souhaitemonth'), GETPOST('date_
 $projectid = GETPOST('projectid');
 $fk_warehouse = GETPOST('fk_warehouse');
 $fk_project = GETPOST('fk_project');
-$type_demande = GETPOST("type_demande");
-$cancel  = GETPOST("cancel");
+// $type_demande = GETPOST("type_demande");
+// $cancel  = GETPOST("cancel");
 
 
 // Security check - Protection if external user
