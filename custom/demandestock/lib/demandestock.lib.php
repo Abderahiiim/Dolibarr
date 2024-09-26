@@ -128,7 +128,10 @@ function get_ds_type(){
 
 function selectType($fieldname = '', $selected){
 
-	$html = '<select id="'.dol_escape_htmltag($fieldname).'" class="flat minwidth200" name="'.dol_escape_htmltag($fieldname)."'";
+	$html =
+
+
+	'<select id="'.dol_escape_htmltag($fieldname).'" name="'.dol_escape_htmltag($fieldname).'" class="flat miniwith200" >';
 	$html .= '<option value ="-1"></option>';
 
 	$ds_type  = get_ds_type();
@@ -141,7 +144,7 @@ function selectType($fieldname = '', $selected){
 	}
 	$html.='</select>';
 	include_once DOL_DOCUMENT_ROOT.'/core/lib.php';
-	$html.=ajax_combobox($fieldname);
+	$html .= ajax_combobox($fieldname);
 
 	return $html;
 }

@@ -3,6 +3,7 @@ CREATE TABLE llx_demandestock (
     ref varchar(30) NOT NULL,
     fk_project integer NOT NULL,
     object_demande text,
+    type_demande integer,
     date_demande datetime,
     desired_date datetime,
     date_creation datetime,

@@ -77,7 +77,7 @@ $desired_date = dol_mktime(12,0,0, GETPOST('date_souhaitemonth'), GETPOST('date_
 $projectid = GETPOST('projectid');
 $fk_warehouse = GETPOST('fk_warehouse');
 $fk_project = GETPOST('fk_project');
-// $type_demande = GETPOST("type_demande");
+$type_demande = GETPOST("type_demande", 'int');
 // $cancel  = GETPOST("cancel");
 
 
@@ -119,7 +119,6 @@ if ($id > 0 ) {
 //action=add&token=0953df526fa45c54037437a4866664a1
 if ($action == 'add') {
 
-
 	$errors =  0;
 	if ($date_demande < 0 ){
 		$errors++;
@@ -128,6 +127,10 @@ if ($action == 'add') {
 	if (empty($obj_demande) ){
 		$errors++;
 		setEventMessage("pls fill the object demande ", "errors");
+	}
+	if ($type_demande < 0){
+		$errors++;
+		setEventMessage("pls choose the type demande ", "errors");
 	}
 	if (!$errors) {
 		$obj->fk_project = $projectid;
@@ -139,12 +142,13 @@ if ($action == 'add') {
 
 		$res = $obj->create($user);
 
-		if ($res > 0) {
-			setEventMessage("object created successfully","success" );
-			header("Location: ".$_SERVER["PHP_SELF"]."?id=".$obj->id);
+		if($res < 0) {
+			$errors++;
+			setEventMessage($obj->error, "error");
 		}
 		else {
-			setEventMessage($obj->error, "error");
+			setEventMessage("object created successfully" ,"success");
+			header("Location: ".$_SERVER["PHP_SELF"]."?id=".$obj->id);
 		}
 	}else{
 		$action = "create";
@@ -188,9 +192,10 @@ if ($action == "create"){
 	print '<input name="object_demande" type="text" value="'.dol_escape_htmltag($obj_demande).'">';
 	'</td></tr>';
 
+	//////////////////////////////
 	print '<tr class="field_type_demande" >';
-	print '<td class="titlefieldcreate fieldrequired" >'.$langs->trans('TypeDemande')."</td>";
-	print '<td>'.selectType('type_demande',$type_demande);
+	print '<td class="titlefieldcreate" >'.$langs->trans('TypeDemande')."</td>";
+	print '<td >'.selectType('type_demande',$type_demande);
 	print '</td></tr>';
 
 
@@ -227,13 +232,15 @@ if ($action == "create"){
 
 	print $form->buttonsSaveCancel("Save");
 	print '</form>';
+
+
 }
+// echo ('<pre>');
+// var_dump($obj);
+// echo ('</pre>');
+// die;
 
-echo GETPOST("type_demande");
-echo "hello";
-die;
-
-{
+else{
 	if ($obj->id > 0 ){
 
 		$head = demandestock_prepare_head($obj);
