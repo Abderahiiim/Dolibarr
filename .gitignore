@@ -1,0 +1,7 @@
+htdocs/conf/conf.php
+htdocs/documents/
+htdocs/logs/
+htdocs/temp/
+vendor/
+node_modules/
+.env
