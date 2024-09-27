@@ -24,6 +24,8 @@
  *	\brief      Home page of demandestock top menu
  */
 
+use Sabre\DAV\Server;
+
 // Load Dolibarr environment
 $res = 0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
@@ -78,7 +80,9 @@ $projectid = GETPOST('projectid');
 $fk_warehouse = GETPOST('fk_warehouse');
 $fk_project = GETPOST('fk_project');
 $type_demande = GETPOST("type_demande", 'int');
-// $cancel  = GETPOST("cancel");
+$cancel  = GETPOST("cancel","alpha");
+
+$confirm = GETPOST("confirm","alpha");
 
 
 // Security check - Protection if external user
@@ -94,6 +98,33 @@ $obj = new Demandestock($db);
 if ($id > 0 ) {
 	$res = $obj->fetch($id);
 }
+
+if (!isModEnabled('demandestock')) {
+	accessforbidden('Module not enabled');
+}
+
+
+// echo $user->rights->demandestock->creer;
+// die;
+
+$usercancreate = !empty($user->rights->demandestock->creer) ? $user->rights->demandestock->creer : 0;
+$usercanvalidate  = !empty($user->rights->demandestock->validate) ? $user->rights->demandestock->validate : 0;
+
+//add perm
+if (!$usercancreate && $action ==  "add") {
+	accessforbidden();
+}
+// validate perm
+if (!$usercanvalidate && $action == "validate")  {
+	$action = '';
+	header('Location: '.$_SERVER['PHP_SELF'].'?id='.$obj->id);
+}
+//button cancel check
+if ($cancel && $action == "add")  {
+	$action = '';
+	header('Location: '.$_SERVER['PHP_SELF'].'?action=create');
+}
+
 
 
 // Security check (enable the most restrictive one)
@@ -115,9 +146,12 @@ if ($id > 0 ) {
  * Actions
  */
 
+$form = new Form($db);
+$formfile = new FormFile($db);
+$formproduct = new FormProduct($db);
 
-//action=add&token=0953df526fa45c54037437a4866664a1
-if ($action == 'add') {
+// action =  add
+if ($action == 'add' && $usercancreate) {
 
 	$errors =  0;
 	if ($date_demande < 0 ){
@@ -155,6 +189,17 @@ if ($action == 'add') {
 	}
 }
 
+///validation button
+
+if ($action == "validate" && $usercanvalidate)  {
+	$text = $langs->trans("ConfirmdemendeStockValidated");
+	$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"]."?id=".$id ,$langs->trans("validateDemandeStock"),$text,"confirm_validate",[],'',1);
+}
+
+if ($action = 'confirm_validate' && $usercanvalidate && $confirm == "yes") {
+	
+}
+
 
 
 
@@ -162,11 +207,13 @@ if ($action == 'add') {
  * View
  */
 
-$form = new Form($db);
-$formfile = new FormFile($db);
-$formproduct = new FormProduct($db);
+
 
 llxHeader("", $langs->trans("DemandeStockArea"), '', '', 0, 0, '', '', '', 'mod-demandestock page-index');
+
+if (!empty($formconfirm)){
+	print $formconfirm;
+}
 
 if ($action == "create"){
 
@@ -250,6 +297,7 @@ else{
 		$morehtmlref = "";
 
 		dol_banner_tab($obj,'id', $linkback, 1,"rowid","ref",$morehtmlref);
+
 		print '<div class="fichecenter"><div class="fichethirdleft">';
 
 		print '<div class="underbanner" clearboth ></div>';
@@ -261,6 +309,8 @@ else{
 		print '<tr> <td class="titlefield" >'.$langs->trans('ObjectDemande').'  </td>';
 		print '<td colspan="3" >'.$obj->object_demande.'</td></tr>';
 
+		print '<tr> <td class="titlefield" >'.$langs->trans('TypeDemande').'  </td>';
+		print '<td colspan="3" >'.$obj->type_demande.'</td></tr>';
 
 		print '<tr> <td class="titlefield" >'.$langs->trans('DateDemande').'  </td>';
 		print '<td colspan =" 3" >';
@@ -287,11 +337,24 @@ else{
 		print img_picto($langs->trans('DefaultWarehouse'),'stock','class="pictofixedwidth"');
 		print $obj_depot->getNomUrl();
 		print '</td></tr>';
-
-
 		print '</tbody>';
-
 		print '</table>';
+		print '</div>';
+		print '</div>';
+
+		print '<div class="fichecenter"><div class="fichethirdright">';
+
+		print '</div>';
+		print '</div>';
+
+		print '<div class="underbanner" clearboth ></div>';
+
+
+		print '<div class="tabsAction">';
+		print dolGetButtonAction('validate','validate','validate',$_SERVER['PHP_SELF'].'?id='.$obj->id."&action=validate",'', $usercanvalidate);
+		print '</div>';
+
+
 
 	}
 
@@ -301,7 +364,7 @@ else{
 
 
 /* BEGIN MODULEBUILDER DRAFT MYOBJECT
-// Draft MyObject
+// Draft MyObject;
 if (isModEnabled('demandestock') && $user->hasRight('demandestock', 'read')) {
 	$langs->load("orders");
 
@@ -372,7 +435,7 @@ if (isModEnabled('demandestock') && $user->hasRight('demandestock', 'read')) {
 END MODULEBUILDER DRAFT MYOBJECT */
 
 
-print '</div><div class="fichetwothirdright">';
+// print '</div><div class="fichetwothirdright">';
 
 
 $NBMAX = getDolGlobalInt('MAIN_SIZE_SHORTLIST_LIMIT');
@@ -430,7 +493,7 @@ if (isModEnabled('demandestock') && $user->hasRight('demandestock', 'read')) {
 }
 */
 
-print '</div></div>';
+// print '</div></div>';
 
 // End of page
 llxFooter();

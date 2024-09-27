@@ -16,6 +16,7 @@ class Demandestock extends CommonObject{
     public $fk_user_valid;
     public $fk_statut ;
 	public $type_demande;
+	public $picto = "demandestock@demandestock" ;
 
 
     const STATUS_DRAFT = 0 ;
@@ -34,7 +35,7 @@ class Demandestock extends CommonObject{
 
     public function fetch($id, $ref = ""){
 
-        $this->db->begin();
+        // $this->db->begin();
 
         $sql = "SELECT ";
         $sql .= "d.rowid,";
@@ -173,6 +174,58 @@ class Demandestock extends CommonObject{
         }
 
 	}
+	//method to get the ref for demende when validated
+	public function getNextNumRef()
+	{
+		global $langs, $conf;
+		$langs->load("demandestock@demandestock");
+
+		if (!getDolGlobalString('DEMANDESTOCK_ADDON')) {
+			$conf->global->DEMANDESTOCK_ADDON = 'mod_demandestock_standard';
+		}
+
+		if (getDolGlobalString('DEMANDESTOCK_ADDON')) {
+			$mybool = false;
+
+			$file = getDolGlobalString('DEMANDESTOCK_ADDON').".php";
+			$classname = getDolGlobalString('DEMANDESTOCK_ADDON');
+
+			// Include file with class
+			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
+			foreach ($dirmodels as $reldir) {
+				$dir = dol_buildpath($reldir."/custom/class/demandestock/");
+
+				// Load file with numbering class (if found)
+				$mybool |= @include_once $dir.$file;
+			}
+
+			if ($mybool === false) {
+				dol_print_error('', "Failed to include file ".$file);
+				return '';
+			}
+
+			if (class_exists($classname)) {
+				$obj = new $classname();
+				$numref = $obj->getNextValue($this);
+
+				if ($numref != '' && $numref != '-1') {
+					return $numref;
+				} else {
+					$this->error = $obj->error;
+					//dol_print_error($this->db,get_class($this)."::getNextNumRef ".$obj->error);
+					return "";
+				}
+			} else {
+				print $langs->trans("Error")." ".$langs->trans("ClassNotFound").' '.$classname;
+				return "";
+			}
+		} else {
+			print $langs->trans("ErrorNumberingModuleNotSetup", $this->element);
+			return "";
+		}
+	}
+
+
 
 	public function getLibStatut($mode = 0)
 	{

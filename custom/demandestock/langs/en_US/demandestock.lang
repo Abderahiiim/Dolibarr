@@ -39,7 +39,8 @@ Warehouse = Depot
 Project = Projet
 Draft = bruillen
 TypeDemande = Type de demande
-
+validateDemandeStock = Validation de demande Stock
+ConfirmdemendeStockValidated = voulew vous vraiment valider cette demande de stock 
 
 
 #

@@ -286,6 +286,34 @@ class modDemandeStock extends DolibarrModules
 		// Permissions provided by this module
 		$this->rights = array();
 		$r = 0;
+		$r++;
+		$this->rights[$r][0] = $this->numero .$r;
+		$this->rights[$r][1] = 'Read objects of stock';
+		$this->rights[$r][2] = 'r';
+		$this->rights[$r][3] = '0';
+		$this->rights[$r][4] = 'lire';
+
+		$r++	;
+		$this->rights[$r][0] = $this->numero .$r;
+		$this->rights[$r][1] = 'Create/Update objects of stock';
+		$this->rights[$r][2] = 'W';
+		$this->rights[$r][3] = '0';
+		$this->rights[$r][4] = 'creer';
+
+		$r++	;
+		$this->rights[$r][0] = $this->numero .$r;
+		$this->rights[$r][1] = 'valider les demandes de stock';
+		$this->rights[$r][2] = 'd';
+		$this->rights[$r][3] = '0';
+		$this->rights[$r][4] = 'validate';
+
+		$r++	;
+		$this->rights[$r][0] = $this->numero .$r;
+		$this->rights[$r][1] = 'supprimer les demandes de stock';
+		$this->rights[$r][2] = 'd';
+		$this->rights[$r][3] = '0';
+		$this->rights[$r][4] = 'delete';
+
 		// Add here entries to declare new permissions
 		/* BEGIN MODULEBUILDER PERMISSIONS */
 		/*
