@@ -81,7 +81,6 @@ $fk_warehouse = GETPOST('fk_warehouse');
 $fk_project = GETPOST('fk_project');
 $type_demande = GETPOST("type_demande", 'int');
 $cancel  = GETPOST("cancel","alpha");
-
 $confirm = GETPOST("confirm","alpha");
 
 
@@ -109,21 +108,27 @@ if (!isModEnabled('demandestock')) {
 
 $usercancreate = !empty($user->rights->demandestock->creer) ? $user->rights->demandestock->creer : 0;
 $usercanvalidate  = !empty($user->rights->demandestock->validate) ? $user->rights->demandestock->validate : 0;
+$usercanread  = !empty($user->rights->demandestock->lire) ? $user->rights->demandestock->lire : 0;
 
 //add perm
 if (!$usercancreate && $action ==  "add") {
 	accessforbidden();
 }
+///read
+if (!$usercanread) {
+	accessforbidden();
+}
+
 // validate perm
 if (!$usercanvalidate && $action == "validate")  {
 	$action = '';
 	header('Location: '.$_SERVER['PHP_SELF'].'?id='.$obj->id);
 }
 //button cancel check
-if ($cancel && $action == "add")  {
-	$action = '';
-	header('Location: '.$_SERVER['PHP_SELF'].'?action=create');
-}
+// if ($cancel && $action == "add")  {
+// 	$action = '';
+// 	header('Location: '.$_SERVER['PHP_SELF'].'?action=create');
+// }
 
 
 
@@ -145,6 +150,7 @@ if ($cancel && $action == "add")  {
 /*
  * Actions
  */
+
 
 $form = new Form($db);
 $formfile = new FormFile($db);
@@ -196,8 +202,10 @@ if ($action == "validate" && $usercanvalidate)  {
 	$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"]."?id=".$id ,$langs->trans("validateDemandeStock"),$text,"confirm_validate",[],'',1);
 }
 
+/////////////////confirm the validation
+
 if ($action = 'confirm_validate' && $usercanvalidate && $confirm == "yes") {
-	
+	$obj->validate($user);
 }
 
 

@@ -5,3 +5,4 @@ htdocs/temp/
 vendor/
 node_modules/
 .env
+documents/dolibarr.log

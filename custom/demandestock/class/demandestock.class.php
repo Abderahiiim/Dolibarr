@@ -174,26 +174,143 @@ class Demandestock extends CommonObject{
         }
 
 	}
+	//////////////////////////////////////////////////////////////////////
+
+	public function validate($user)
+	{
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+		global $conf;
+
+		if($this->status == self::STATUS_VALIDATED) return 0;
+
+		$now = dol_now();
+
+		$error = 0;
+		dol_syslog(get_class($this).'::validate user='.$user->id);
+
+
+		$this->db->begin();
+
+		// Define new ref
+		if (!$error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happened, but when it occurs, the test save life
+			$num = $this->getNextNumRef();
+		}
+
+		echo $num ;
+		die;
+
+
+
+		
+
+		$this->newref = dol_sanitizeFileName($num);
+
+		if ($num) {
+			$sql = "UPDATE ".MAIN_DB_PREFIX."demandestock SET ref = '".$this->db->escape($num)."', statut = 1";
+			$sql.= ", fk_user_valid = ".$user->id.", date_valid = '".$this->db->idate($now)."'";
+			$sql .= " WHERE rowid = ".((int) $this->id)." AND statut = 0";
+
+			dol_syslog(get_class($this)."::validate", LOG_DEBUG);
+			$resql = $this->db->query($sql);
+			if (!$resql) {
+				dol_print_error($this->db);
+				$error++;
+				$this->error = $this->db->lasterror();
+			}
+
+
+
+			// if (!$error) {
+
+			// 	$this->oldref = $this->ref;
+
+			// 	// Rename directory if dir was a temporary ref
+			// 	if (preg_match('/^[\(]?PROV/i', $this->ref)) {
+			// 		// Now we rename also files into index
+			// 		$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filename = CONCAT('".$this->db->escape($this->newref)."', SUBSTR(filename, ".(strlen($this->ref) + 1).")), filepath = 'contract/".$this->db->escape($this->newref)."'";
+			// 		$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'contract/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
+			// 		$resql = $this->db->query($sql);
+			// 		if (!$resql) {
+			// 			$error++;
+			// 			$this->error = $this->db->lasterror();
+			// 		}
+			// 		$sql = 'UPDATE '.MAIN_DB_PREFIX."ecm_files set filepath = 'contract/".$this->db->escape($this->newref)."'";
+			// 		$sql .= " WHERE filepath = 'contract/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
+			// 		$resql = $this->db->query($sql);
+			// 		if (!$resql) {
+			// 			$error++;
+			// 			$this->error = $this->db->lasterror();
+			// 		}
+
+			// 		// We rename directory ($this->ref = old ref, $num = new ref) in order not to lose the attachments
+			// 		$oldref = dol_sanitizeFileName($this->ref);
+			// 		$newref = dol_sanitizeFileName($num);
+			// 		$dirsource = $conf->contract->dir_output.'/'.$oldref;
+			// 		$dirdest = $conf->contract->dir_output.'/'.$newref;
+			// 		if (!$error && file_exists($dirsource)) {
+			// 			dol_syslog(get_class($this)."::validate rename dir ".$dirsource." into ".$dirdest);
+
+			// 			if (@rename($dirsource, $dirdest)) {
+			// 				dol_syslog("Rename ok");
+			// 				// Rename docs starting with $oldref with $newref
+			// 				$listoffiles = dol_dir_list($conf->contract->dir_output.'/'.$newref, 'files', 1, '^'.preg_quote($oldref, '/'));
+			// 				foreach ($listoffiles as $fileentry) {
+			// 					$dirsource = $fileentry['name'];
+			// 					$dirdest = preg_replace('/^'.preg_quote($oldref, '/').'/', $newref, $dirsource);
+			// 					$dirsource = $fileentry['path'].'/'.$dirsource;
+			// 					$dirdest = $fileentry['path'].'/'.$dirdest;
+			// 					@rename($dirsource, $dirdest);
+			// 				}
+			// 			}
+			// 		}
+			// 	}
+			// }
+
+			// Set new ref and define current statut
+			if (!$error) {
+
+
+				$this->ref = $num;
+				$this->status = self::STATUS_VALIDATED;
+				$this->status = self::STATUS_VALIDATED;	// deprecated
+				$this->date_validation = $now;
+			}
+		} else {
+			$error++;
+		}
+
+		if (!$error) {
+			$this->db->commit();
+			return 1;
+		} else {
+			$this->db->rollback();
+			return -1;
+		}
+	}
+
+
 	//method to get the ref for demende when validated
 	public function getNextNumRef()
 	{
 		global $langs, $conf;
-		$langs->load("demandestock@demandestock");
+		$langs->load("demandestock@demandestock"); //changed the domain to demandestock@demandestock
 
-		if (!getDolGlobalString('DEMANDESTOCK_ADDON')) {
-			$conf->global->DEMANDESTOCK_ADDON = 'mod_demandestock_standard';
+		if (!getDolGlobalString('DEMANDESTOCK_ADDON')) { // changed DEMANDESTOCK_ADDON
+			$conf->global->DEMANDESTOCK_ADDON = 'mod_demandestock_standard'; // changed DEMANDESTOCK_ADDON
 		}
 
-		if (getDolGlobalString('DEMANDESTOCK_ADDON')) {
+		if (getDolGlobalString('DEMANDESTOCK_ADDON')) { // changed DEMANDESTOCK_ADDON
 			$mybool = false;
 
-			$file = getDolGlobalString('DEMANDESTOCK_ADDON').".php";
-			$classname = getDolGlobalString('DEMANDESTOCK_ADDON');
+			$file = getDolGlobalString('DEMANDESTOCK_ADDON').".php"; // changed DEMANDESTOCK_ADDON
+			$classname = getDolGlobalString('DEMANDESTOCK_ADDON'); // changed DEMANDESTOCK_ADDON
 
 			// Include file with class
 			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
 			foreach ($dirmodels as $reldir) {
-				$dir = dol_buildpath($reldir."/custom/class/demandestock/");
+				$dir = dol_buildpath($reldir."/custom/demandestock/core/modules/demandestock/"); //changed this link
+
+
 
 				// Load file with numbering class (if found)
 				$mybool |= @include_once $dir.$file;
