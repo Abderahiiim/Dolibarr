@@ -130,7 +130,6 @@ function selectType($fieldname = '', $selected){
 
 	$html =
 
-
 	'<select id="'.dol_escape_htmltag($fieldname).'" name="'.dol_escape_htmltag($fieldname).'" class="flat miniwith200" >';
 	$html .= '<option value ="-1"></option>';
 

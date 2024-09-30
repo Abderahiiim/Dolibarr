@@ -94,6 +94,8 @@ if (isset($user->socid) && $user->socid > 0) {
 $obj = new Demandestock($db);
 
 
+
+
 if ($id > 0 ) {
 	$res = $obj->fetch($id);
 }
@@ -109,6 +111,7 @@ if (!isModEnabled('demandestock')) {
 $usercancreate = !empty($user->rights->demandestock->creer) ? $user->rights->demandestock->creer : 0;
 $usercanvalidate  = !empty($user->rights->demandestock->validate) ? $user->rights->demandestock->validate : 0;
 $usercanread  = !empty($user->rights->demandestock->lire) ? $user->rights->demandestock->lire : 0;
+$usercandelete  = !empty($user->rights->demandestock->delete) ? $user->rights->demandestock->delete : 0;
 
 //add perm
 if (!$usercancreate && $action ==  "add") {
@@ -195,7 +198,7 @@ if ($action == 'add' && $usercancreate) {
 	}
 }
 
-///validation button
+///validate confirmation
 
 if ($action == "validate" && $usercanvalidate)  {
 	$text = $langs->trans("ConfirmdemendeStockValidated");
@@ -204,8 +207,29 @@ if ($action == "validate" && $usercanvalidate)  {
 
 /////////////////confirm the validation
 
-if ($action = 'confirm_validate' && $usercanvalidate && $confirm == "yes") {
-	$obj->validate($user);
+if ($action == 'confirm_validate' && $usercanvalidate && $confirm == "yes") {
+	 $obj->validate($user);
+}
+
+///delete confirmation
+
+if ($action == "delete" && $usercandelete)  {
+	$text = $langs->trans("ConfirmdemendeStockDeleted");
+	$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"]."?id=".$id ,$langs->trans("deleteDemandeStock"),$text,"confirm_delete",[],'',1);
+}
+/////////////////////////////button delete and cancel the validation
+
+if ($action == 'confirm_delete' && $usercandelete && $confirm == 'yes') {
+	$resultat = $obj->delete();
+	// echo $resultat;
+	// die;
+	if ($resultat > 0) {
+		setEventMessage('the demande has been deleted successfully','success');
+		header('Location : '.dol_buildpath('demandestock/list.php'));
+		// exit;
+	}else{
+		setEventMessage($obj->error,'error');
+	}
 }
 
 
@@ -359,10 +383,13 @@ else{
 
 
 		print '<div class="tabsAction">';
-		print dolGetButtonAction('validate','validate','validate',$_SERVER['PHP_SELF'].'?id='.$obj->id."&action=validate",'', $usercanvalidate);
+		if ($obj->status == Demandestock::STATUS_DRAFT && $usercanvalidate ) {
+			print dolGetButtonAction('validate','validate','validate',$_SERVER['PHP_SELF'].'?id='.$obj->id."&action=validate",'', $usercanvalidate);
+		}
+
+		print dolGetButtonAction('Supprimer','Supprimer','delete',$_SERVER['PHP_SELF'].'?id='.$obj->id."&action=delete",'', $usercandelete);
+
 		print '</div>';
-
-
 
 	}
 

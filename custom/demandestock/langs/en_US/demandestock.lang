@@ -40,8 +40,11 @@ Project = Projet
 Draft = bruillen
 TypeDemande = Type de demande
 validateDemandeStock = Validation de demande Stock
-ConfirmdemendeStockValidated = voulew vous vraiment valider cette demande de stock 
-
+deleteDemandeStock = Suppression de demande Stock
+ConfirmdemendeStockValidated = voulez vous vraiment valider cette demande de stock 
+ConfirmdemendeStockDeleted = voulez vous vraiment supprimer cette demande de stock 
+dateCreation = date de creation 
+Fkuserauthor = Author
 
 #
 # About page
